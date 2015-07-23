@@ -38,4 +38,39 @@ With a checkout of the code get [Composer](http://getcomposer.org) in your PATH 
 ```sh
 ./composer install
 ./vendor/bin/phpunit
+```
 
+##Example Usage
+```php
+use Chadicus\Slim\OAuth2\Routes;
+
+//Set-up the OAuth2 Server
+$storage = new OAuth2\Storage\Pdo(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
+$server = new OAuth2\Server($storage);
+$server->addGrantType(new OAuth2\GrantType\AuthorizationCode($storage));
+$server->addGrantType(new OAuth2\GrantType\ClientCredentials($storage));
+
+//Set-up the Slim Application
+$slim = new \Slim\Slim();
+
+Routes\Token::register($slim, $server);
+Routes\Authorize::register($slim, $server);
+
+//Add custom routes
+$slim->get('/foo', function() use ($slim) {
+    if(!isset($slim->request->headers['Authorization'])) {
+        $slim->response->headers->set('Content-Type', 'application/json');
+        $slim->response->setStatus(400);
+        $slim->response->setBody(json_encode(['error' => 'Access credentials not supplied']));
+        return;
+    }
+
+    $authorization = $slim->request->headers['Authorization'];
+
+    //validate access token against your storage
+
+    $slim->response->setBody('valid credentials');
+});
+
+$slim->run();
+```
