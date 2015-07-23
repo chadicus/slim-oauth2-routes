@@ -108,5 +108,6 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('\Slim\Route', $route);
         $this->assertInstanceOf('\Chadicus\Slim\OAuth2\Routes\Token', $route->getCallable());
+        $this->assertSame([\Slim\Http\Request::METHOD_POST], $route->getHttpMethods());
     }
 }
