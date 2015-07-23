@@ -9,6 +9,7 @@ use Chadicus\Slim\OAuth2\Routes\Token;
  *
  * @coversDefaultClass \Chadicus\Slim\OAuth2\Routes\Token
  * @covers ::<private>
+ * @covers ::__construct
  */
 final class TokenTest extends \PHPUnit_Framework_TestCase
 {
@@ -82,5 +83,30 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             ],
             $actual
         );
+    }
+
+    /**
+     * Verify basic behavior of register
+     *
+     * @test
+     * @covers ::register
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $storage = new \OAuth2\Storage\Memory([]);
+        $server = new \OAuth2\Server($storage, [], []);
+
+        \Slim\Environment::mock();
+
+        $slim = new \Slim\Slim();
+
+        Token::register($slim, $server);
+
+        $route = $slim->router()->getNamedRoute('token');
+
+        $this->assertInstanceOf('\Slim\Route', $route);
+        $this->assertInstanceOf('\Chadicus\Slim\OAuth2\Routes\Token', $route->getCallable());
     }
 }
