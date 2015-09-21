@@ -12,11 +12,13 @@ class Authorize
 
     private $slim;
     private $server;
+    private $template;
 
-    public function __construct(Slim $slim, OAuth2\Server $server)
+    public function __construct(Slim $slim, OAuth2\Server $server, $template = null)
     {
         $this->slim = $slim;
         $this->server = $server;
+        $this->template = $template ?: self::getDefaultTemplate();
     }
 
     public function __invoke()
@@ -31,7 +33,7 @@ class Authorize
 
         $authorized = $this->slim->request()->params('authorized');
         if (empty($authorized)) {
-            //@TODO send to authorize landing page
+            $this->render($this->template, ['client_id' => $request->query('client_id', false)]);
             return;
         }
 
@@ -52,5 +54,15 @@ class Authorize
     public static function register(Slim $slim, OAuth2\Server $server)
     {
         $slim->map(self::ROUTE, new self($slim, $server))->via('GET', 'POST')->name('authorize');
+    }
+
+    /**
+     * Helper method to return the default template for the /authorize route
+     *
+     * @return string The path to the default template
+     */
+    private static function getDefaultTemplate()
+    {
+        return __DIR__ . '/../templates/authorize.phtml';
     }
 }
