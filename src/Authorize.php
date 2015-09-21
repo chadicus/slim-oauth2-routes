@@ -12,11 +12,13 @@ class Authorize
 
     private $slim;
     private $server;
+    private $template;
 
-    public function __construct(Slim $slim, OAuth2\Server $server)
+    public function __construct(Slim $slim, OAuth2\Server $server, $template = 'authorize.phtml')
     {
         $this->slim = $slim;
         $this->server = $server;
+        $this->template = $template;
     }
 
     public function __invoke()
@@ -31,7 +33,7 @@ class Authorize
 
         $authorized = $this->slim->request()->params('authorized');
         if (empty($authorized)) {
-            //@TODO send to authorize landing page
+            $this->slim->render($this->template, ['client_id' => $request->query('client_id', false)]);
             return;
         }
 
@@ -49,8 +51,8 @@ class Authorize
      *
      * @return void
      */
-    public static function register(Slim $slim, OAuth2\Server $server)
+    public static function register(Slim $slim, OAuth2\Server $server, $template = 'authorize.phtml')
     {
-        $slim->map(self::ROUTE, new self($slim, $server))->via('GET', 'POST')->name('authorize');
+        $slim->map(self::ROUTE, new self($slim, $server, $template))->via('GET', 'POST')->name('authorize');
     }
 }
