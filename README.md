@@ -57,8 +57,14 @@ $server->addGrantType(new OAuth2\GrantType\ClientCredentials($storage));
 //Set-up the Slim Application
 $slim = new \Slim\Slim();
 
+//By default templates are found in this repositories templates folder.
+$slim->config('templates.path', '/path/to/chadicus/slim-oauth2-routes/templates');
+
 Routes\Token::register($slim, $server);
-Routes\Authorize::register($slim, $server);
+//You can add your custom authorize template here
+Routes\Authorize::register($slim, $server, 'authorize.phtml');
+//You can add your custom receive-code template here
+Routes\ReceiveCode::register($slim, 'receive-code.phtml');
 
 //Add custom routes
 $slim->get('/foo', function() use ($slim) {
