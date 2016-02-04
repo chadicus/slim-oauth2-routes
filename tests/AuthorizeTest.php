@@ -129,7 +129,8 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
             [
                 'REQUEST_METHOD' => 'POST',
                 'PATH_INFO' => '/authorize',
-                'QUERY_STRING' => 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&state=test',
+                'QUERY_STRING' => 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&'
+                . 'state=test',
                 'slim.input' => 'authorized=yes',
             ]
         );
@@ -206,7 +207,8 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
             [
                 'REQUEST_METHOD' => 'GET',
                 'PATH_INFO' => '/authorize',
-                'QUERY_STRING' => 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&state=test',
+                'QUERY_STRING' => 'client_id=testClientId&redirect_uri=http://example.com&response_type=code'
+                . '&state=test',
             ]
         );
 

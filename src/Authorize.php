@@ -6,6 +6,9 @@ use Chadicus\Slim\OAuth2\Http\MessageBridge;
 use OAuth2;
 use Slim\Slim;
 
+/**
+ * Slim route for /authorization endpoint.
+ */
 class Authorize
 {
     const ROUTE = '/authorize';
@@ -36,7 +39,7 @@ class Authorize
      *
      * @param Slim          $slim     The slim framework application instance.
      * @param OAuth2\Server $server   The oauth2 server imstance.
-     * @param string        $template The template for /authorize
+     * @param string        $template The template for /authorize.
      */
     public function __construct(Slim $slim, OAuth2\Server $server, $template = 'authorize.phtml')
     {
@@ -77,7 +80,7 @@ class Authorize
      *
      * @param Slim          $slim     The slim framework application instance.
      * @param OAuth2\Server $server   The oauth2 server imstance.
-     * @param string        $template The template for /authorize
+     * @param string        $template The template for /authorize.
      *
      * @return void
      */

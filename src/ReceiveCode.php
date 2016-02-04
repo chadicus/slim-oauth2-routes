@@ -4,6 +4,9 @@ namespace Chadicus\Slim\OAuth2\Routes;
 
 use Slim\Slim;
 
+/**
+ * Slim route for oauth2 receive-code.
+ */
 final class ReceiveCode
 {
     const ROUTE = '/receive-code';
@@ -26,7 +29,7 @@ final class ReceiveCode
      * Construct a new instance of ReceiveCode route.
      *
      * @param Slim   $slim     The slim framework application instance.
-     * @param string $template The template for /receive-code
+     * @param string $template The template for /receive-code.
      */
     public function __construct(Slim $slim, $template = 'receive-code.phtml')
     {
@@ -48,7 +51,7 @@ final class ReceiveCode
      * Register this route with the given Slim application and OAuth2 server
      *
      * @param Slim   $slim     The slim framework application instance.
-     * @param string $template The template for /receive-code
+     * @param string $template The template for /receive-code.
      *
      * @return void
      */
