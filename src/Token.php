@@ -6,6 +6,9 @@ use Chadicus\Slim\OAuth2\Http\MessageBridge;
 use OAuth2;
 use Slim\Slim;
 
+/**
+ * Slim route for /token endpoint.
+ */
 class Token
 {
     const ROUTE = '/token';
@@ -36,6 +39,11 @@ class Token
         $this->server = $server;
     }
 
+    /**
+     * Allows this class to be callable.
+     *
+     * @return void
+     */
     public function __invoke()
     {
         $request = MessageBridge::newOAuth2Request($this->slim->request());
