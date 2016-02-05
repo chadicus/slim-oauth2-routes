@@ -69,7 +69,6 @@ class Authorize
             return;
         }
 
-        //@TODO implement user_id
         $this->server->handleAuthorizeRequest($request, $response, $authorized === 'yes');
 
         MessageBridge::mapResponse($response, $this->slim->response());
