@@ -1,19 +1,19 @@
 # Chadicus\Slim\OAuth2\Routes
 
-[![Build Status](https://travis-ci.org/chadicus/slim-oauth2-middleware.svg?branch=master)](https://travis-ci.org/chadicus/slim-oauth2-middleware)
-[![Code Quality](https://scrutinizer-ci.com/g/chadicus/slim-oauth2-middleware/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/chadicus/slim-oauth2-middleware/?branch=master)
-[![Code Coverage](https://coveralls.io/repos/github/chadicus/slim-oauth2-middleware/badge.svg?branch=master)](https://coveralls.io/github/chadicus/slim-oauth2-middleware?branch=master)
+[![Build Status](https://travis-ci.org/chadicus/slim-oauth2-routes.svg?branch=master)](https://travis-ci.org/chadicus/slim-oauth2-routes)
+[![Code Quality](https://scrutinizer-ci.com/g/chadicus/slim-oauth2-routes/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/chadicus/slim-oauth2-routes/?branch=master)
+[![Code Coverage](https://coveralls.io/repos/github/chadicus/slim-oauth2-routes/badge.svg?branch=master)](https://coveralls.io/github/chadicus/slim-oauth2-routes?branch=master)
 [![Dependency Status](https://www.versioneye.com/user/projects/55b908ed653762001a00133c/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55b908ed653762001a00133c)
 
-[![Latest Stable Version](https://poser.pugx.org/chadicus/slim-oauth2-middleware/v/stable)](https://packagist.org/packages/chadicus/slim-oauth2-middleware)
-[![Latest Unstable Version](https://poser.pugx.org/chadicus/slim-oauth2-middleware/v/unstable)](https://packagist.org/packages/chadicus/slim-oauth2-middleware)
-[![License](https://poser.pugx.org/chadicus/slim-oauth2-middleware/license)](https://packagist.org/packages/chadicus/slim-oauth2-middleware)
+[![Latest Stable Version](https://poser.pugx.org/chadicus/slim-oauth2-routes/v/stable)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
+[![Latest Unstable Version](https://poser.pugx.org/chadicus/slim-oauth2-routes/v/unstable)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
+[![License](https://poser.pugx.org/chadicus/slim-oauth2-routes/license)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
 
-[![Total Downloads](https://poser.pugx.org/chadicus/slim-oauth2-middleware/downloads)](https://packagist.org/packages/chadicus/slim-oauth2-middleware)
-[![Daily Downloads](https://poser.pugx.org/chadicus/slim-oauth2-middleware/d/daily)](https://packagist.org/packages/chadicus/slim-oauth2-middleware)
-[![Monthly Downloads](https://poser.pugx.org/chadicus/slim-oauth2-middleware/d/monthly)](https://packagist.org/packages/chadicus/slim-oauth2-middleware)
+[![Total Downloads](https://poser.pugx.org/chadicus/slim-oauth2-routes/downloads)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
+[![Daily Downloads](https://poser.pugx.org/chadicus/slim-oauth2-routes/d/daily)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
+[![Monthly Downloads](https://poser.pugx.org/chadicus/slim-oauth2-routes/d/monthly)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
 
-[![Documentation](https://img.shields.io/badge/reference-phpdoc-blue.svg?style=flat)](http://pholiophp.org/chadicus/slim-oauth2-middleware)
+[![Documentation](https://img.shields.io/badge/reference-phpdoc-blue.svg?style=flat)](http://pholiophp.org/chadicus/slim-oauth2-routes)
 
 OAuth2 routes for use within a Slim Framework API
 
