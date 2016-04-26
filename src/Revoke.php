@@ -8,7 +8,7 @@ use Slim\Slim;
 
 /**
  * The revoke class.
- * 
+ *
  */
 class Revoke
 {
