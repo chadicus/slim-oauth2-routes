@@ -6,6 +6,10 @@ use Chadicus\Slim\OAuth2\Http\MessageBridge;
 use OAuth2;
 use Slim\Slim;
 
+/**
+ * The revoke class.
+ * 
+ */
 class Revoke
 {
     const ROUTE = '/revoke';
@@ -27,8 +31,8 @@ class Revoke
     /**
      * Construct a new instance of Authorize.
      *
-     * @param Slim          $slim     The slim framework application instance.
-     * @param OAuth2\Server $server   The oauth2 server imstance.
+     * @param Slim          $slim   The slim framework application instance.
+     * @param OAuth2\Server $server The oauth2 server imstance.
      */
     public function __construct(Slim $slim, OAuth2\Server $server)
     {
@@ -53,8 +57,8 @@ class Revoke
     /**
      * Register this route with the given Slim application and OAuth2 server
      *
-     * @param Slim          $slim     The slim framework application instance.
-     * @param OAuth2\Server $server   The oauth2 server instance.
+     * @param Slim          $slim   The slim framework application instance.
+     * @param OAuth2\Server $server The oauth2 server instance.
      *
      * @return void
      */
