@@ -70,6 +70,7 @@ final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
 
         $expected = <<<HTML
 HTTP/1.1 200 OK
+Content-Type: text/html
 
 <h2>The authorization code is {$code}</h2>
 

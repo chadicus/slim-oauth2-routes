@@ -78,7 +78,7 @@ final class Authorize implements RouteCallbackInterface
         if (empty($authorized)) {
             $response = Http\ResponseBridge::fromOAuth2($oauth2Response);
             $this->view->render($response, $this->template, ['client_id' => $oauth2Request->query('client_id', false)]);
-            return $response;
+            return $response->withHeader('Content-Type', 'text/html');
         }
 
         $this->server->handleAuthorizeRequest($oauth2Request, $oauth2Response, $authorized === 'yes');

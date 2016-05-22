@@ -199,6 +199,7 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
 
         $expected = <<<HTML
 HTTP/1.1 200 OK
+Content-Type: text/html
 
 <form method="post">
     <label>Do You Authorize testClientId?</label><br />
