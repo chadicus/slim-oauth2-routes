@@ -3,6 +3,11 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\Authorize;
+use OAuth2;
+use OAuth2\Storage;
+use Slim;
+use Slim\Http;
+use Slim\Views;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Authorize class.
@@ -23,10 +28,14 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
      */
     public function invokeNoClientSpecified()
     {
-        $storage = new \OAuth2\Storage\Memory([]);
-        $server = new \OAuth2\Server($storage, [], []);
+        $storage = new Storage\Memory([]);
+        $server = new OAuth2\Server($storage, [], []);
 
-        \Slim\Environment::mock(
+        $view = new Views\PhpRenderer(__DIR__ . '/../templates');
+
+        $route = new Authorize($server, $view);
+
+        $env = Http\Environment::mock(
             [
                 'REQUEST_METHOD' => 'GET',
                 'PATH_INFO' => '/authorize',
@@ -34,18 +43,12 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $slim = new \Slim\Slim();
-        $slim->get('/authorize', new Authorize($slim, $server));
+        $request = Http\Request::createFromEnvironment($env);
+        $response = $route($request, new Http\Response);
 
-        ob_start();
+        $this->assertSame(400, $response->getStatusCode());
 
-        $slim->run();
-
-        ob_get_clean();
-
-        $this->assertSame(400, $slim->response->status());
-
-        $actual = json_decode($slim->response->getBody(), true);
+        $actual = json_decode((string)$response->getBody(), true);
         $this->assertSame(
             [
                 'error' => 'invalid_client',
@@ -56,7 +59,7 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Verify behavior of __invoke() with invalid client_id parameter
+     * Verify behavior of __invoke() with invalid client_id parameter.
      *
      * @test
      * @covers ::__invoke
@@ -65,10 +68,14 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
      */
     public function invokeInvalidClientSpecified()
     {
-        $storage = new \OAuth2\Storage\Memory([]);
-        $server = new \OAuth2\Server($storage, [], []);
+        $storage = new Storage\Memory([]);
+        $server = new OAuth2\Server($storage, [], []);
 
-        \Slim\Environment::mock(
+        $view = new Views\PhpRenderer(__DIR__ . '/../templates');
+
+        $route = new Authorize($server, $view);
+
+        $env = Http\Environment::mock(
             [
                 'REQUEST_METHOD' => 'GET',
                 'PATH_INFO' => '/authorize',
@@ -76,18 +83,13 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $slim = new \Slim\Slim();
-        $slim->get('/authorize', new Authorize($slim, $server));
+        $request = Http\Request::createFromEnvironment($env);
 
-        ob_start();
+        $response = $route($request, new Http\Response);
 
-        $slim->run();
+        $this->assertSame(400, $response->getStatusCode());
 
-        ob_get_clean();
-
-        $this->assertSame(400, $slim->response->status());
-
-        $actual = json_decode($slim->response->getBody(), true);
+        $actual = json_decode((string)$response->getBody(), true);
         $this->assertSame(
             [
                 'error' => 'invalid_client',
@@ -102,12 +104,13 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
      *
      * @test
      * @covers ::__invoke
+     * @group chad
      *
      * @return void
      */
     public function invoke()
     {
-        $storage = new \OAuth2\Storage\Memory(
+        $storage = new Storage\Memory(
             [
                 'client_credentials' => [
                     'testClientId' => [
@@ -117,68 +120,42 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
                 ],
             ]
         );
-        $server = new \OAuth2\Server(
-            $storage,
-            [
-                'allow_implicit' => true,
-            ],
+        $server = new OAuth2\Server($storage, ['allow_implicit' => true], []);
+
+        $view = new Views\PhpRenderer(__DIR__ . '/../templates/');
+
+        $route = new Authorize($server, $view);
+
+        $headers = new Http\Headers();
+        $headers->set('Content-Type', 'application/x-www-form-urlencoded');
+
+        $stream = fopen('php://memory','r+');
+        fwrite($stream, 'authorized=yes');
+        rewind($stream);
+        $body = new Http\Stream($stream);
+
+        $query = 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&state=test';
+
+        $request = new Http\Request(
+            'POST',
+            Http\Uri::createFromString("http://example.com/authorize?{$query}"),
+            $headers,
+            [],
+            ['REQUEST_METHOD' => 'POST'],
+            $body,
             []
         );
 
-        \Slim\Environment::mock(
-            [
-                'REQUEST_METHOD' => 'POST',
-                'PATH_INFO' => '/authorize',
-                'QUERY_STRING' => 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&'
-                . 'state=test',
-                'slim.input' => 'authorized=yes',
-            ]
-        );
+        $response = $route($request, new Http\Response());
 
-        $slim = new \Slim\Slim();
-        $slim->map('/authorize', new Authorize($slim, $server))->via('POST', 'GET');
+        $this->assertSame(302, $response->getStatusCode());
 
-        ob_start();
-
-        $slim->run();
-
-        ob_get_clean();
-
-        $this->assertSame(302, $slim->response->status());
-
-        $location = $slim->response->headers()->get('Location');
+        $location = array_pop($response->getHeaders()['Location']);
         $parts = parse_url($location);
         parse_str($parts['query'], $query);
 
         $this->assertTrue(isset($query['code']));
         $this->assertSame('test', $query['state']);
-
-    }
-
-    /**
-     * Verify basic behavior of register
-     *
-     * @test
-     * @covers ::register
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $storage = new \OAuth2\Storage\Memory([]);
-        $server = new \OAuth2\Server($storage, [], []);
-
-        \Slim\Environment::mock();
-
-        $slim = new \Slim\Slim();
-
-        Authorize::register($slim, $server);
-
-        $route = $slim->router()->getNamedRoute('authorize');
-
-        $this->assertInstanceOf('\Slim\Route', $route);
-        $this->assertInstanceOf('\Chadicus\Slim\OAuth2\Routes\Authorize', $route->getCallable());
-        $this->assertSame([\Slim\Http\Request::METHOD_GET, \Slim\Http\Request::METHOD_POST], $route->getHttpMethods());
     }
 
     /**
@@ -191,7 +168,7 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
      */
     public function invokeEmptyAuthorized()
     {
-        $storage = new \OAuth2\Storage\Memory(
+        $storage = new Storage\Memory(
             [
                 'client_credentials' => [
                     'testClientId' => [
@@ -201,27 +178,28 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
                 ],
             ]
         );
-        $server = new \OAuth2\Server($storage, [], []);
+        $server = new OAuth2\Server($storage, [], []);
 
-        \Slim\Environment::mock(
+        $query = 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&state=test';
+        $env = Http\Environment::mock(
             [
                 'REQUEST_METHOD' => 'GET',
                 'PATH_INFO' => '/authorize',
-                'QUERY_STRING' => 'client_id=testClientId&redirect_uri=http://example.com&response_type=code'
-                . '&state=test',
+                'QUERY_STRING' => $query,
             ]
         );
 
-        $slim = new \Slim\Slim();
-        $slim->get('/authorize', new Authorize($slim, $server));
+        $view = new Views\PhpRenderer(__DIR__ . '/../templates');
 
-        ob_start();
+        $route = new Authorize($server, $view);
 
-        $slim->run();
+        $request = Http\Request::createFromEnvironment($env);
 
-        ob_get_clean();
+        $response = $route($request, new Http\Response());
 
         $expected = <<<HTML
+HTTP/1.1 200 OK
+
 <form method="post">
     <label>Do You Authorize testClientId?</label><br />
     <input type="submit" name="authorized" value="yes">
@@ -230,6 +208,27 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
 
 HTML;
 
-        $this->assertSame($expected, $slim->response->getBody());
+        ob_start();
+        echo (string)$response;
+        $actual = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertSame($expected, $actual);
+    }
+
+    /**
+     * Verify behavior of __construct() when $view is invalid.
+     *
+     * @test
+     * @covers ::__construct
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMethod $view must implement a render() method
+     *
+     * @return void
+     */
+    public function constructWithInvalidView()
+    {
+        $server = new OAuth2\Server(new Storage\Memory([]), [], []);
+        new Authorize($server, new \StdClass());
     }
 }

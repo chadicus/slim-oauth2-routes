@@ -2,23 +2,25 @@
 
 namespace Chadicus\Slim\OAuth2\Routes;
 
-use Chadicus\Slim\OAuth2\Http\MessageBridge;
+use Chadicus\Slim\OAuth2\Http;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use OAuth2;
-use Slim\Slim;
+use Slim\Views\Twig;
 
 /**
  * Slim route for /authorization endpoint.
  */
-class Authorize
+final class Authorize implements RouteCallbackInterface
 {
     const ROUTE = '/authorize';
 
     /**
-     * The slim framework application instance.
+     * The slim framework view helper.
      *
-     * @var Slim
+     * @var object
      */
-    private $slim;
+    private $view;
 
     /**
      * The oauth2 server imstance.
@@ -37,54 +39,50 @@ class Authorize
     /**
      * Construct a new instance of Authorize.
      *
-     * @param Slim          $slim     The slim framework application instance.
      * @param OAuth2\Server $server   The oauth2 server imstance.
+     * @param object        $view     The slim framework view helper.
      * @param string        $template The template for /authorize.
+     *
+     * @throws \InvalidArgumentException Thrown if $view is not an object implementing a render method.
      */
-    public function __construct(Slim $slim, OAuth2\Server $server, $template = 'authorize.phtml')
+    public function __construct(OAuth2\Server $server, $view, $template = '/authorize.phtml')
     {
-        $this->slim = $slim;
+        if (!is_object($view) || !method_exists($view, 'render')) {
+            throw new \InvalidArgumentException('$view must implement a render() method');
+        }
+
         $this->server = $server;
+        $this->view = $view;
         $this->template = $template;
     }
 
     /**
-     * Call this class as a function.
+     * Invoke this route callback.
      *
-     * @return void
+     * @param ServerRequestInterface $request   Represents the current HTTP request.
+     * @param ResponseInterface      $response  Represents the current HTTP response.
+     * @param array                  $arguments Values for the current route’s named placeholders.
+     *
+     * @return ResponseInterface
      */
-    public function __invoke()
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $arguments = [])
     {
-        $request = MessageBridge::newOAuth2Request($this->slim->request());
-        $response = new OAuth2\Response();
-        $isValid = $this->server->validateAuthorizeRequest($request, $response);
+        $oauth2Request = Http\RequestBridge::toOAuth2($request);
+        $oauth2Response = new OAuth2\Response();
+        $isValid = $this->server->validateAuthorizeRequest($oauth2Request, $oauth2Response);
         if (!$isValid) {
-            MessageBridge::mapResponse($response, $this->slim->response());
-            return;
+            return Http\ResponseBridge::fromOAuth2($oauth2Response);
         }
 
-        $authorized = $this->slim->request()->params('authorized');
+        $authorized = $oauth2Request->request('authorized');
         if (empty($authorized)) {
-            $this->slim->render($this->template, ['client_id' => $request->query('client_id', false)]);
-            return;
+            $response = Http\ResponseBridge::fromOAuth2($oauth2Response);
+            $this->view->render($response, $this->template, ['client_id' => $oauth2Request->query('client_id', false)]);
+            return $response;
         }
 
-        $this->server->handleAuthorizeRequest($request, $response, $authorized === 'yes');
+        $this->server->handleAuthorizeRequest($oauth2Request, $oauth2Response, $authorized === 'yes');
 
-        MessageBridge::mapResponse($response, $this->slim->response());
-    }
-
-    /**
-     * Register this route with the given Slim application and OAuth2 server
-     *
-     * @param Slim          $slim     The slim framework application instance.
-     * @param OAuth2\Server $server   The oauth2 server imstance.
-     * @param string        $template The template for /authorize.
-     *
-     * @return void
-     */
-    public static function register(Slim $slim, OAuth2\Server $server, $template = 'authorize.phtml')
-    {
-        $slim->map(self::ROUTE, new self($slim, $server, $template))->via('GET', 'POST')->name('authorize');
+        return Http\ResponseBridge::fromOAuth2($oauth2Response);
     }
 }

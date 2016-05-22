@@ -2,21 +2,23 @@
 
 namespace Chadicus\Slim\OAuth2\Routes;
 
-use Slim\Slim;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Slim\Views\Twig;
 
 /**
  * Slim route for oauth2 receive-code.
  */
-final class ReceiveCode
+final class ReceiveCode implements RouteCallbackInterface
 {
     const ROUTE = '/receive-code';
 
     /**
-     * The slim framework application instance.
+     * The slim framework view Helper.
      *
-     * @var Slim $slim
+     * @var object
      */
-    private $slim;
+    private $view;
 
     /**
      * The template for /receive-code
@@ -28,35 +30,33 @@ final class ReceiveCode
     /**
      * Construct a new instance of ReceiveCode route.
      *
-     * @param Slim   $slim     The slim framework application instance.
+     * @param object $view     The slim framework view helper.
      * @param string $template The template for /receive-code.
+     *
+     * @throws \InvalidArgumentException Thrown if $view is not an object implementing a render method.
      */
-    public function __construct(Slim $slim, $template = 'receive-code.phtml')
+    public function __construct($view, $template = '/receive-code.phtml')
     {
-        $this->slim = $slim;
+        if (!is_object($view) || !method_exists($view, 'render')) {
+            throw new \InvalidArgumentException('$view must implement a render() method');
+        }
+
+        $this->view = $view;
         $this->template = $template;
     }
 
     /**
-     * Call this class as a function.
+     * Invoke this route callback.
      *
-     * @return void
+     * @param ServerRequestInterface $request   Represents the current HTTP request.
+     * @param ResponseInterface      $response  Represents the current HTTP response.
+     * @param array                  $arguments Values for the current route’s named placeholders.
+     *
+     * @return ResponseInterface
      */
-    public function __invoke()
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $arguments = [])
     {
-        $this->slim->render($this->template, ['code' => $this->slim->request()->params('code')]);
-    }
-
-    /**
-     * Register this route with the given Slim application and OAuth2 server
-     *
-     * @param Slim   $slim     The slim framework application instance.
-     * @param string $template The template for /receive-code.
-     *
-     * @return void
-     */
-    public static function register(Slim $slim, $template = 'receive-code.phtml')
-    {
-        $slim->map(self::ROUTE, new self($slim, $template))->via('GET', 'POST')->name('receive-code');
+        $this->view->render($response, $this->template, ['code' => $request->getParam('code')]);
+        return $response;
     }
 }

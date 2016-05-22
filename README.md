@@ -15,11 +15,11 @@
 
 [![Documentation](https://img.shields.io/badge/reference-phpdoc-blue.svg?style=flat)](http://pholiophp.org/chadicus/slim-oauth2-routes)
 
-OAuth2 routes for use within a Slim Framework API
+[OAuth2 Server](http://bshaffer.github.io/oauth2-server-php-docs/) route callbacks for use within a [Slim 3 Framework](http://www.slimframework.com/) API
 
 ## Requirements
 
-Chadicus\Slim\OAuth2\Routes requires PHP 5.4 (or later).
+Chadicus\Slim\OAuth2\Routes requires PHP 5.6 (or later).
 
 ##Composer
 To add the library as a local, per-project dependency use [Composer](http://getcomposer.org)! Simply add a dependency on
@@ -28,7 +28,7 @@ To add the library as a local, per-project dependency use [Composer](http://getc
 ```json
 {
     "require": {
-        "chadicus/slim-oauth2-routes": "dev-master"
+        "chadicus/slim-oauth2-routes": "~3.0"
     }
 }
 ```
@@ -47,43 +47,51 @@ With a checkout of the code get [Composer](http://getcomposer.org) in your PATH 
 ./vendor/bin/phpunit
 ```
 
+## A Note on Using Views
+The `authorize` and `receive-code` route require `view` objects. The given view object must implement a render method such as the one found in [slim/twig-view](https://github.com/slimphp/Twig-View/blob/master/src/Twig.php#L103) and [slim/php-view](https://github.com/slimphp/PHP-View/blob/master/src/PhpRenderer.php#L64). It would be best if there was a common `ViewInterface` which both implementing but as of now such an interface does not exist.
+
 ##Example Usage
 ```php
 use Chadicus\Slim\OAuth2\Routes;
+use OAuth2;
+use OAuth2\GrantType;
+use OAuth2\Storage;
+use Slim;
+use Slim\Views;
 
 //Set-up the OAuth2 Server
-$storage = new OAuth2\Storage\Pdo(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
+$storage = new Storage\Pdo(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
 $server = new OAuth2\Server($storage);
-$server->addGrantType(new OAuth2\GrantType\AuthorizationCode($storage));
-$server->addGrantType(new OAuth2\GrantType\ClientCredentials($storage));
+$server->addGrantType(new GrantType\AuthorizationCode($storage));
+$server->addGrantType(new GrantType\ClientCredentials($storage));
 
 //Set-up the Slim Application
-$slim = new \Slim\Slim();
+$app = new Slim\App(
+    [
+        'view' => new Views\PhpRenderer('/path/to/chadicus/slim-oauth2-routes/templates'),
+    ]
+);
 
-//By default templates are found in this repositories templates folder.
-$slim->config('templates.path', '/path/to/chadicus/slim-oauth2-routes/templates');
+$container = $app->getContainer();
 
-Routes\Token::register($slim, $server);
-//You can add your custom authorize template here
-Routes\Authorize::register($slim, $server, 'authorize.phtml');
-//You can add your custom receive-code template here
-Routes\ReceiveCode::register($slim, 'receive-code.phtml');
+$app->map(['GET', 'POST'], Routes\Authorize::ROUTE, new Routes\Authorize($server, $container['view']))->setName('authorize');
+$app->post(Routes\Token::ROUTE, new Routes\Token($server)->setName('token');
+$app->map(['GET', 'POST'], Routes\ReceiveCode::ROUTE, new Routes\ReceiveCode($server, $container['view']))->setName('receive-code');
+$app->post(Routes\Revoke::ROUTE, new Routes\Revoke($server))->setName('revoke');
 
 //Add custom routes
-$slim->get('/foo', function() use ($slim) {
-    if(!isset($slim->request->headers['Authorization'])) {
-        $slim->response->headers->set('Content-Type', 'application/json');
-        $slim->response->setStatus(400);
-        $slim->response->setBody(json_encode(['error' => 'Access credentials not supplied']));
-        return;
+$slim->get('/foo', function($request, $response, $args) {
+    if(!isset($request->getHeaders()['Authorization'])) {
+        return $response->withStatus(400);
     }
 
     $authorization = $slim->request->headers['Authorization'];
 
     //validate access token against your storage
 
-    $slim->response->setBody('valid credentials');
+    return $response->withStatus(200);
 });
 
-$slim->run();
+//run the app
+$app->run();
 ```

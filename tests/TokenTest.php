@@ -3,6 +3,11 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\Token;
+use OAuth2;
+use OAuth2\GrantType;
+use OAuth2\Storage;
+use Slim;
+use Slim\Http;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Token class.
@@ -23,7 +28,7 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
      */
     public function invoke()
     {
-        $storage = new \OAuth2\Storage\Memory(
+        $storage = new Storage\Memory(
             [
                 'client_credentials' => [
                     'testClientId' => [
@@ -34,15 +39,20 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $server = new \OAuth2\Server(
+        $server = new OAuth2\Server(
             $storage,
             [
                 'access_lifetime' => 3600,
             ],
             [
-                new \OAuth2\GrantType\ClientCredentials($storage),
+                new GrantType\ClientCredentials($storage),
             ]
         );
+
+        $uri = Http\Uri::createFromString('https://example.com/foo/bar?baz=bat');
+
+        $headers = new Http\Headers();
+        $headers->add('Content-Type', 'application/json');
 
         $json = json_encode(
             [
@@ -52,28 +62,21 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        \Slim\Environment::mock(
-            [
-                'REQUEST_METHOD' => 'POST',
-                'CONTENT_TYPE' => 'application/json',
-                'PATH_INFO' => '/token',
-                'CONTENT_LENGTH' => strlen($json),
-                'slim.input' => $json,
-            ]
-        );
+        $stream = fopen('php://memory','r+');
+        fwrite($stream, $json);
+        rewind($stream);
+        $body = new Http\Stream($stream);
 
-        $slim = new \Slim\Slim();
-        $slim->post('/token', new Token($slim, $server));
+        $request = new Http\Request('POST', $uri, $headers, [], ['REQUEST_METHOD' => 'POST'], $body, []);
 
-        ob_start();
+        $route = new Token($server);
 
-        $slim->run();
+        $response = $route($request, new Http\Response());
 
-        ob_get_clean();
+        $actual = json_decode((string)$response->getBody(), true);
 
-        $this->assertSame(200, $slim->response->status());
+        $this->assertSame(200, $response->getStatusCode());
 
-        $actual = json_decode($slim->response->getBody(), true);
         $this->assertSame(
             [
                 'access_token' => $actual['access_token'],
@@ -83,31 +86,5 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             ],
             $actual
         );
-    }
-
-    /**
-     * Verify basic behavior of register
-     *
-     * @test
-     * @covers ::register
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $storage = new \OAuth2\Storage\Memory([]);
-        $server = new \OAuth2\Server($storage, [], []);
-
-        \Slim\Environment::mock();
-
-        $slim = new \Slim\Slim();
-
-        Token::register($slim, $server);
-
-        $route = $slim->router()->getNamedRoute('token');
-
-        $this->assertInstanceOf('\Slim\Route', $route);
-        $this->assertInstanceOf('\Chadicus\Slim\OAuth2\Routes\Token', $route->getCallable());
-        $this->assertSame([\Slim\Http\Request::METHOD_POST], $route->getHttpMethods());
     }
 }
