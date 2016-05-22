@@ -3,6 +3,11 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\ReceiveCode;
+use OAuth2;
+use OAuth2\GrantType;
+use OAuth2\Storage;
+use Slim\Http;
+use Slim\Views;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\ReceiveCode class.
@@ -23,7 +28,7 @@ final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
      */
     public function invoke()
     {
-        $storage = new \OAuth2\Storage\Memory(
+        $storage = new Storage\Memory(
             [
                 'client_credentials' => [
                     'testClientId' => [
@@ -35,19 +40,22 @@ final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $server = new \OAuth2\Server(
+        $server = new OAuth2\Server(
             $storage,
             [
                 'access_lifetime' => 3600,
             ],
             [
-                new \OAuth2\GrantType\ClientCredentials($storage),
+                new GrantType\ClientCredentials($storage),
             ]
         );
 
-        $code = md5(time());
+        $view = new Views\PhpRenderer(__DIR__ . '/../templates');
 
-        \Slim\Environment::mock(
+        $route = new ReceiveCode($view);
+
+        $code = md5(time());
+        $env = Http\Environment::mock(
             [
                 'REQUEST_METHOD' => 'POST',
                 'CONTENT_TYPE' => 'application/json',
@@ -56,51 +64,38 @@ final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $slim = new \Slim\Slim();
-        $slim->post('/receive-code', new ReceiveCode($slim));
+        $request = Http\Request::createFromEnvironment($env);
 
-        ob_start();
-
-        $slim->run();
-
-        ob_get_clean();
-
-        $this->assertSame(200, $slim->response->status());
+        $response = $route($request, new Http\Response());
 
         $expected = <<<HTML
+HTTP/1.1 200 OK
+
 <h2>The authorization code is {$code}</h2>
 
 HTML;
 
-        $this->assertSame($expected, $slim->response->getBody());
+        ob_start();
+        echo (string)$response;
+        $actual = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertSame($expected, $actual);
     }
 
     /**
-     * Verify basic behavior of register
+     * Verify behavior of __construct() when $view is invalid.
      *
      * @test
-     * @covers ::register
+     * @covers ::__construct
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMethod $view must implement a render() method
      *
      * @return void
      */
-    public function register()
+    public function constructWithInvalidView()
     {
-        $storage = new \OAuth2\Storage\Memory([]);
-        $server = new \OAuth2\Server($storage, [], []);
-
-        \Slim\Environment::mock();
-
-        $slim = new \Slim\Slim();
-
-        ReceiveCode::register($slim);
-
-        $route = $slim->router()->getNamedRoute('receive-code');
-
-        $this->assertInstanceOf('\Slim\Route', $route);
-        $this->assertInstanceOf('\Chadicus\Slim\OAuth2\Routes\ReceiveCode', $route->getCallable());
-        $this->assertSame(
-            [\Slim\Http\Request::METHOD_GET, \Slim\Http\Request::METHOD_POST],
-            $route->getHttpMethods()
-        );
+        $server = new OAuth2\Server(new Storage\Memory([]), [], []);
+        new ReceiveCode($server, new \StdClass());
     }
 }

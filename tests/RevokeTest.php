@@ -3,6 +3,10 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\Revoke;
+use OAuth2;
+use OAuth2\Storage;
+use OAuth2\GrantType;
+use Slim\Http;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Revoke class.
@@ -13,7 +17,6 @@ use Chadicus\Slim\OAuth2\Routes\Revoke;
  */
 final class RevokeTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * Verify basic behavior of __invoke()
      *
@@ -25,7 +28,7 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
     public function invoke()
     {
         $token = md5(time());
-        $storage = new \OAuth2\Storage\Memory(
+        $storage = new Storage\Memory(
             [
                 'access_tokens' => [
                     $token => [
@@ -39,15 +42,17 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $server = new \OAuth2\Server(
+        $server = new OAuth2\Server(
             $storage,
             [
                 'access_lifetime' => 3600,
             ],
             [
-                new \OAuth2\GrantType\ClientCredentials($storage),
+                new GrantType\ClientCredentials($storage),
             ]
         );
+
+        $route = new Revoke($server);
 
         $json = json_encode(
             [
@@ -56,7 +61,12 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        \Slim\Environment::mock(
+        $stream = fopen('php://memory','r+');
+        fwrite($stream, $json);
+        rewind($stream);
+        $body = new Http\Stream($stream);
+
+        $env = Http\Environment::mock(
             [
                 'REQUEST_METHOD' => 'POST',
                 'CONTENT_TYPE' => 'application/json',
@@ -66,18 +76,13 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $slim = new \Slim\Slim();
-        $slim->post('/revoke', new Revoke($slim, $server));
+        $request = Http\Request::createFromEnvironment($env)->withBody($body);
 
-        ob_start();
+        $response = $route($request, new Http\Response());
 
-        $slim->run();
+        $this->assertSame(200, $response->getStatusCode());
 
-        ob_get_clean();
-
-        $this->assertSame(200, $slim->response->status());
-
-        $actual = json_decode($slim->response->getBody(), true);
+        $actual = json_decode((string)$response->getBody(), true);
         $this->assertSame(
             [
                 'revoked' => true,
@@ -86,31 +91,5 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertFalse($storage->getAccessToken($token));
-    }
-
-    /**
-     * Verify basic behavior of register
-     *
-     * @test
-     * @covers ::register
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $storage = new \OAuth2\Storage\Memory([]);
-        $server = new \OAuth2\Server($storage, [], []);
-
-        \Slim\Environment::mock();
-
-        $slim = new \Slim\Slim();
-
-        Revoke::register($slim, $server);
-
-        $route = $slim->router()->getNamedRoute('revoke');
-
-        $this->assertInstanceOf('\Slim\Route', $route);
-        $this->assertInstanceOf('\Chadicus\Slim\OAuth2\Routes\Revoke', $route->getCallable());
-        $this->assertSame([\Slim\Http\Request::METHOD_POST], $route->getHttpMethods());
     }
 }

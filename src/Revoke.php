@@ -2,24 +2,18 @@
 
 namespace Chadicus\Slim\OAuth2\Routes;
 
-use Chadicus\Slim\OAuth2\Http\MessageBridge;
+use Chadicus\Slim\OAuth2\Http\RequestBridge;
+use Chadicus\Slim\OAuth2\Http\ResponseBridge;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\message\ResponseInterface;
 use OAuth2;
-use Slim\Slim;
 
 /**
  * The revoke class.
- *
  */
-class Revoke
+final class Revoke implements RouteCallbackInterface
 {
     const ROUTE = '/revoke';
-
-    /**
-     * The slim framework application instance.
-     *
-     * @var Slim
-     */
-    private $slim;
 
     /**
      * The oauth2 server instance.
@@ -31,39 +25,28 @@ class Revoke
     /**
      * Construct a new instance of Authorize.
      *
-     * @param Slim          $slim   The slim framework application instance.
      * @param OAuth2\Server $server The oauth2 server imstance.
      */
-    public function __construct(Slim $slim, OAuth2\Server $server)
+    public function __construct(OAuth2\Server $server)
     {
-        $this->slim = $slim;
         $this->server = $server;
     }
 
     /**
-     * Call this class as a function.
+     * Invoke this route callback.
      *
-     * @return void
+     * @param ServerRequestInterface $request   Represents the current HTTP request.
+     * @param ResponseInterface      $response  Represents the current HTTP response.
+     * @param array                  $arguments Values for the current route’s named placeholders.
+     *
+     * @return ResponseInterface
      */
-    public function __invoke()
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $arguments = [])
     {
-        $request = MessageBridge::newOAuth2Request($this->slim->request());
-        MessageBridge::mapResponse(
-            $this->server->handleRevokeRequest($request),
-            $this->slim->response()
+        return ResponseBridge::fromOAuth2(
+            $this->server->handleRevokeRequest(
+                RequestBridge::toOAuth2($request)
+            )
         );
-    }
-
-    /**
-     * Register this route with the given Slim application and OAuth2 server
-     *
-     * @param Slim          $slim   The slim framework application instance.
-     * @param OAuth2\Server $server The oauth2 server instance.
-     *
-     * @return void
-     */
-    public static function register(Slim $slim, OAuth2\Server $server)
-    {
-        $slim->post(self::ROUTE, new static($slim, $server))->name('revoke');
     }
 }
