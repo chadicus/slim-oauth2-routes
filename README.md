@@ -81,11 +81,7 @@ $app->post(Routes\Revoke::ROUTE, new Routes\Revoke($server))->setName('revoke');
 
 //Add custom routes
 $slim->get('/foo', function($request, $response, $args) {
-    if(!isset($request->getHeaders()['Authorization'])) {
-        return $response->withStatus(400);
-    }
-
-    $authorization = $slim->request->headers['Authorization'];
+    $authorization = $request->getHeaderLine('Authorization');
 
     //validate access token against your storage
 
