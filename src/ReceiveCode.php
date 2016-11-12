@@ -4,7 +4,6 @@ namespace Chadicus\Slim\OAuth2\Routes;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Slim\Views\Twig;
 
 /**
  * Slim route for oauth2 receive-code.
