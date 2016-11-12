@@ -6,7 +6,6 @@ use Chadicus\Slim\OAuth2\Http;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use OAuth2;
-use Slim\Views\Twig;
 
 /**
  * Slim route for /authorization endpoint.
