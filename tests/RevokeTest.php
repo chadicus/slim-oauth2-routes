@@ -6,7 +6,9 @@ use Chadicus\Slim\OAuth2\Routes\Revoke;
 use OAuth2;
 use OAuth2\Storage;
 use OAuth2\GrantType;
-use Slim\Http;
+use Zend\Diactoros\Response;
+use Zend\Diactoros\ServerRequest;
+use Zend\Diactoros\Stream;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Revoke class.
@@ -54,31 +56,16 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
 
         $route = new Revoke($server);
 
-        $json = json_encode(
-            [
-                'token_type_hint' => 'access_token',
-                'token' => $token,
-            ]
-        );
+        $body = [
+            'token_type_hint' => 'access_token',
+            'token' => $token,
+        ];
 
-        $stream = fopen('php://memory','r+');
-        fwrite($stream, $json);
-        rewind($stream);
-        $body = new Http\Stream($stream);
+        $uri = '/revoke';
+        $headers = ['Content-Type' => ['application/json']];
+        $request = new ServerRequest(['REQUEST_METHOD' => 'POST'], [], $uri, 'POST', 'php://input', $headers, [], [], $body);
 
-        $env = Http\Environment::mock(
-            [
-                'REQUEST_METHOD' => 'POST',
-                'CONTENT_TYPE' => 'application/json',
-                'PATH_INFO' => '/revoke',
-                'CONTENT_LENGTH' => strlen($json),
-                'slim.input' => $json,
-            ]
-        );
-
-        $request = Http\Request::createFromEnvironment($env)->withBody($body);
-
-        $response = $route($request, new Http\Response());
+        $response = $route($request, new Response());
 
         $this->assertSame(200, $response->getStatusCode());
 

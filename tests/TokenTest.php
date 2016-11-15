@@ -6,8 +6,9 @@ use Chadicus\Slim\OAuth2\Routes\Token;
 use OAuth2;
 use OAuth2\GrantType;
 use OAuth2\Storage;
-use Slim;
-use Slim\Http;
+use Zend\Diactoros\Response;
+use Zend\Diactoros\ServerRequest;
+use Zend\Diactoros\Stream;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Token class.
@@ -49,29 +50,20 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $uri = Http\Uri::createFromString('https://example.com/foo/bar?baz=bat');
+        $uri = 'localhost:8888/token';
 
-        $headers = new Http\Headers();
-        $headers->add('Content-Type', 'application/json');
+        $headers = ['Content-Type' => ['application/json']];
 
-        $json = json_encode(
-            [
-                'client_id' => 'testClientId',
-                'client_secret' => 'testClientSecret',
-                'grant_type' => 'client_credentials',
-            ]
-        );
-
-        $stream = fopen('php://memory','r+');
-        fwrite($stream, $json);
-        rewind($stream);
-        $body = new Http\Stream($stream);
-
-        $request = new Http\Request('POST', $uri, $headers, [], ['REQUEST_METHOD' => 'POST'], $body, []);
+        $body = [
+            'client_id' => 'testClientId',
+            'client_secret' => 'testClientSecret',
+            'grant_type' => 'client_credentials',
+        ];
+        $request = new ServerRequest(['REQUEST_METHOD' => 'POST'], [], $uri, 'POST', 'php://input', $headers, [], [], $body);
 
         $route = new Token($server);
 
-        $response = $route($request, new Http\Response());
+        $response = $route($request, new Response());
 
         $actual = json_decode((string)$response->getBody(), true);
 

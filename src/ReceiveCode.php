@@ -55,7 +55,9 @@ final class ReceiveCode implements RouteCallbackInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $arguments = [])
     {
-        $this->view->render($response, $this->template, ['code' => $request->getParam('code')]);
+        $queryParams = $request->getQueryParams();
+        $code = array_key_exists('code', $queryParams) ? $queryParams['code'] : null;
+        $this->view->render($response, $this->template, ['code' => $code]);
         return $response->withHeader('Content-Type', 'text/html');
     }
 }

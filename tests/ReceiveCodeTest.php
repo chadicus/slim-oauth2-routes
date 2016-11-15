@@ -6,8 +6,10 @@ use Chadicus\Slim\OAuth2\Routes\ReceiveCode;
 use OAuth2;
 use OAuth2\GrantType;
 use OAuth2\Storage;
-use Slim\Http;
 use Slim\Views;
+use Zend\Diactoros\Response;
+use Zend\Diactoros\ServerRequest;
+use Zend\Diactoros\Stream;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\ReceiveCode class.
@@ -55,33 +57,25 @@ final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
         $route = new ReceiveCode($view);
 
         $code = md5(time());
-        $env = Http\Environment::mock(
+        $request = new ServerRequest(
+			[],
+			[],
+			null,
+            'POST',
+			'php://input',
+            ['Content-Type' => 'application/json'],
+			[],
             [
-                'REQUEST_METHOD' => 'POST',
-                'CONTENT_TYPE' => 'application/json',
-                'PATH_INFO' => '/receive-code',
-                'QUERY_STRING' => "code={$code}&state=xyz",
+                'code' => $code,
+				'state' => 'xyz',
             ]
         );
 
-        $request = Http\Request::createFromEnvironment($env);
+        $response = $route($request, new Response());
 
-        $response = $route($request, new Http\Response());
+        $expectedBody = "<h2>The authorization code is {$code}</h2>\n";
 
-        $expected = <<<HTML
-HTTP/1.1 200 OK
-Content-Type: text/html
-
-<h2>The authorization code is {$code}</h2>
-
-HTML;
-
-        ob_start();
-        echo (string)$response;
-        $actual = ob_get_contents();
-        ob_end_clean();
-
-        $this->assertSame($expected, $actual);
+        $this->assertSame($expectedBody, (string)$response->getBody());
     }
 
     /**

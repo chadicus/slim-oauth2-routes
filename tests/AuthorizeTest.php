@@ -5,9 +5,10 @@ namespace ChadicusTest\Slim\OAuth2\Routes;
 use Chadicus\Slim\OAuth2\Routes\Authorize;
 use OAuth2;
 use OAuth2\Storage;
-use Slim;
-use Slim\Http;
 use Slim\Views;
+use Zend\Diactoros\Response;
+use Zend\Diactoros\ServerRequest;
+use Zend\Diactoros\Stream;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Authorize class.
@@ -35,16 +36,7 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
 
         $route = new Authorize($server, $view);
 
-        $env = Http\Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'PATH_INFO' => '/authorize',
-                'QUERY_STRING' => '',
-            ]
-        );
-
-        $request = Http\Request::createFromEnvironment($env);
-        $response = $route($request, new Http\Response);
+        $response = $route(new ServerRequest(), new Response());
 
         $this->assertSame(400, $response->getStatusCode());
 
@@ -75,17 +67,9 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
 
         $route = new Authorize($server, $view);
 
-        $env = Http\Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'PATH_INFO' => '/authorize',
-                'QUERY_STRING' => 'client_id=invalidClientId',
-            ]
-        );
+        $request = new ServerRequest([], [], null, null, 'php://input', [], [], ['client_id' => 'invalidClientId']);
 
-        $request = Http\Request::createFromEnvironment($env);
-
-        $response = $route($request, new Http\Response);
+        $response = $route($request, new Response());
 
         $this->assertSame(400, $response->getStatusCode());
 
@@ -104,7 +88,6 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
      *
      * @test
      * @covers ::__invoke
-     * @group chad
      *
      * @return void
      */
@@ -126,27 +109,29 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
 
         $route = new Authorize($server, $view);
 
-        $headers = new Http\Headers();
-        $headers->set('Content-Type', 'application/x-www-form-urlencoded');
-
         $stream = fopen('php://memory','r+');
         fwrite($stream, 'authorized=yes');
         rewind($stream);
-        $body = new Http\Stream($stream);
+        $body = new Stream($stream);
 
-        $query = 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&state=test';
-
-        $request = new Http\Request(
-            'POST',
-            Http\Uri::createFromString("http://example.com/authorize?{$query}"),
-            $headers,
+        $request = new ServerRequest(
             [],
-            ['REQUEST_METHOD' => 'POST'],
+            [],
+            'http://example.com/authorize',
+            'POST',
             $body,
-            []
+            ['Content-Type' => 'application/x-www-form-urlencoded'],
+            [],
+            [
+                'client_id' => 'testClientId',
+                'redirect_uri' => 'http://example.com',
+                'response_type' => 'code',
+                'state' => 'test',
+            ],
+            ['authorized' => 'yes']
         );
 
-        $response = $route($request, new Http\Response());
+        $response = $route($request, new Response());
 
         $this->assertSame(302, $response->getStatusCode());
 
@@ -180,27 +165,30 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
         );
         $server = new OAuth2\Server($storage, [], []);
 
-        $query = 'client_id=testClientId&redirect_uri=http://example.com&response_type=code&state=test';
-        $env = Http\Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'PATH_INFO' => '/authorize',
-                'QUERY_STRING' => $query,
-            ]
-        );
-
         $view = new Views\PhpRenderer(__DIR__ . '/../templates');
 
         $route = new Authorize($server, $view);
 
-        $request = Http\Request::createFromEnvironment($env);
+        $request = new ServerRequest(
+            [],
+            [],
+            null,
+            'GET',
+            'php://input',
+            [],
+            [],
+            [
+                'client_id' => 'testClientId',
+                'redirect_uri' => 'http://example.com',
+                'response_type' => 'code',
+                'state' => 'test',
+            ]
+        );
 
-        $response = $route($request, new Http\Response());
+        $response = $route($request, new Response());
 
+        $this->assertSame(200, $response->getStatusCode());
         $expected = <<<HTML
-HTTP/1.1 200 OK
-Content-Type: text/html
-
 <form method="post">
     <label>Do You Authorize testClientId?</label><br />
     <input type="submit" name="authorized" value="yes">
@@ -209,12 +197,7 @@ Content-Type: text/html
 
 HTML;
 
-        ob_start();
-        echo (string)$response;
-        $actual = ob_get_contents();
-        ob_end_clean();
-
-        $this->assertSame($expected, $actual);
+        $this->assertSame($expected, (string)$response->getBody());
     }
 
     /**
