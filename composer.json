@@ -13,7 +13,7 @@
     "require": {
         "php": "~5.6 || ~7.0",
         "bshaffer/oauth2-server-php": "~1.8",
-        "chadicus/slim-oauth2-http": "^3.0"
+        "chadicus/slim-oauth2-http": "^3.1"
     },
     "suggest": {
         "chadicus/slim-oauth2-middleware": "Adds OAuth2 middleware for API requests.",
