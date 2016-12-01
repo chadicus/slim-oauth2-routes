@@ -87,3 +87,40 @@ $slim->get('/foo', function($request, $response, $args) {
 //run the app
 $app->run();
 ```
+## Authorize and The UserIdProvider
+Within the Authorization route, you can define a  `UserIdProviderInterface` to extract the user_id from the incoming request. By default the
+route will look in the `GET` query params.
+
+```php
+
+class ArgumentUserIdProvider implements UserIdProviderInterface
+{
+	public function getUserId(ServerRequestInterface $request, array $arguments)
+	{
+		return isset($arguments['user_id']) ? $arguments['user_id'] : null;
+	}
+}
+
+//middleware to add user_id to route parametersA
+$loginMiddelware = function ($request, $response, $next) {
+	// Validate the user credentials
+	$userId = MyUserService::getUserIdIfValidCredentials($request);
+	if ($userId === false) {
+		return $response->withStatus(303);
+	}
+
+	//Put user_id into the route parameters
+	$route = $request->getAttribute('route');
+	$route->setArgument('user_id', $userId);
+
+	//Credentials are valid, continue so the authorization code can be sent to the clients callback_uri
+	return $next($request, $response);
+};
+
+$authorizeRoute = new Routes\Authorize($server, $view, 'authorize.phtml', new ArgumentUserIdProvider());
+$app->map(
+	['GET', 'POST'],
+	Routes\Authorize::ROUTE,
+	$authorizeRoute
+)->add($loginMiddleware)->setName('authorize');
+```
