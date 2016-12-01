@@ -68,8 +68,7 @@ final class Authorize implements RouteCallbackInterface
     {
         $oauth2Request = Http\RequestBridge::toOAuth2($request);
         $oauth2Response = new OAuth2\Response();
-        $isValid = $this->server->validateAuthorizeRequest($oauth2Request, $oauth2Response);
-        if (!$isValid) {
+        if (!$this->server->validateAuthorizeRequest($oauth2Request, $oauth2Response)) {
             return Http\ResponseBridge::fromOAuth2($oauth2Response);
         }
 
