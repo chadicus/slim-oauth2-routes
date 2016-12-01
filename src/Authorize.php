@@ -36,16 +36,28 @@ final class Authorize implements RouteCallbackInterface
     private $template;
 
     /**
+     * Extracts user_id from the incoming request.
+     *
+     * @var UserIdProviderInterface
+     */
+    private $userIdProvider;
+
+    /**
      * Construct a new instance of Authorize.
      *
-     * @param OAuth2\Server $server   The oauth2 server imstance.
-     * @param object        $view     The slim framework view helper.
-     * @param string        $template The template for /authorize.
+     * @param OAuth2\Server           $server         The oauth2 server imstance.
+     * @param object                  $view           The slim framework view helper.
+     * @param string                  $template       The template for /authorize.
+     * @param UserIdProviderInterface $userIdProvider Object to extract a user_id based on the incoming request.
      *
      * @throws \InvalidArgumentException Thrown if $view is not an object implementing a render method.
      */
-    public function __construct(OAuth2\Server $server, $view, $template = '/authorize.phtml')
-    {
+    public function __construct(
+        OAuth2\Server $server,
+        $view,
+        $template = '/authorize.phtml',
+        UserIdProviderInterface $userIdProvider = null
+    ) {
         if (!is_object($view) || !method_exists($view, 'render')) {
             throw new \InvalidArgumentException('$view must implement a render() method');
         }
@@ -53,6 +65,12 @@ final class Authorize implements RouteCallbackInterface
         $this->server = $server;
         $this->view = $view;
         $this->template = $template;
+
+        if ($userIdProvider == null) {
+            $userIdProvider = new UserIdProvider();
+        }
+
+        $this->userIdProvider = $userIdProvider;
     }
 
     /**
@@ -79,7 +97,12 @@ final class Authorize implements RouteCallbackInterface
             return $response->withHeader('Content-Type', 'text/html');
         }
 
-        $this->server->handleAuthorizeRequest($oauth2Request, $oauth2Response, $authorized === 'yes');
+        $this->server->handleAuthorizeRequest(
+            $oauth2Request,
+            $oauth2Response,
+            $authorized === 'yes',
+            $this->userIdProvider->getUserId($request, $arguments)
+        );
 
         return Http\ResponseBridge::fromOAuth2($oauth2Response);
     }
