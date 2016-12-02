@@ -101,7 +101,7 @@ class ArgumentUserIdProvider implements UserIdProviderInterface
 	}
 }
 
-//middleware to add user_id to route parametersA
+//middleware to add user_id to route parameters
 $loginMiddelware = function ($request, $response, $next) {
 	// Validate the user credentials
 	$userId = MyUserService::getUserIdIfValidCredentials($request);
