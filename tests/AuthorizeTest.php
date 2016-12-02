@@ -215,4 +215,82 @@ HTML;
         $server = new OAuth2\Server(new Storage\Memory([]), [], []);
         new Authorize($server, new \StdClass());
     }
+
+    /**
+     * Verify behavior of __invoke() with user_id parameter.
+     *
+     * @test
+     * @covers ::__invoke
+     *
+     * @return void
+     */
+    public function invokeWithUserId()
+    {
+        $storage = new Storage\Memory(
+            [
+                'client_credentials' => [
+                    'testClientId' => [
+                        'client_id' => 'testClientId',
+                        'client_secret' => 'testClientSecret',
+                    ],
+                ],
+            ]
+        );
+        $server = new OAuth2\Server($storage, ['allow_implicit' => true], []);
+
+        $view = new Views\PhpRenderer(__DIR__ . '/../templates/');
+
+        $route = new Authorize($server, $view);
+
+        $stream = fopen('php://memory','r+');
+        fwrite($stream, 'authorized=yes');
+        rewind($stream);
+        $body = new Stream($stream);
+
+        $request = new ServerRequest(
+            [],
+            [],
+            'http://example.com/authorize',
+            'POST',
+            $body,
+            ['Content-Type' => 'application/x-www-form-urlencoded'],
+            [],
+            [
+                'client_id' => 'testClientId',
+                'redirect_uri' => 'http://example.com',
+                'response_type' => 'code',
+                'state' => 'test',
+                'user_id' => 'theUsername',
+            ],
+            ['authorized' => 'yes']
+        );
+
+        $response = $route($request, new Response());
+
+        $this->assertSame(302, $response->getStatusCode());
+
+        $location = array_pop($response->getHeaders()['Location']);
+        $parts = parse_url($location);
+        parse_str($parts['query'], $query);
+
+        $this->assertTrue(isset($query['code']));
+        $this->assertSame('test', $query['state']);
+
+        $expires = $storage->authorizationCodes[$query['code']]['expires'];
+
+        $this->assertSame(
+            [
+                $query['code'] => [
+                    'code' => $query['code'],
+                    'client_id' => 'testClientId',
+                    'user_id' => 'theUsername',
+                    'redirect_uri' => 'http://example.com',
+                    'expires' => $expires,
+                    'scope' => null,
+                    'id_token' => null,
+                ],
+            ],
+            $storage->authorizationCodes
+        );
+    }
 }
