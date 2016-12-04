@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/chadicus/slim-oauth2-routes.svg?branch=master)](https://travis-ci.org/chadicus/slim-oauth2-routes)
 [![Code Quality](https://scrutinizer-ci.com/g/chadicus/slim-oauth2-routes/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/chadicus/slim-oauth2-routes/?branch=master)
 [![Code Coverage](https://coveralls.io/repos/github/chadicus/slim-oauth2-routes/badge.svg?branch=master)](https://coveralls.io/github/chadicus/slim-oauth2-routes?branch=master)
-[![Dependency Status](https://www.versioneye.com/user/projects/55b908ed653762001a00133c/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55b908ed653762001a00133c)
+[![Dependency Status](https://www.versioneye.com/user/projects/58445b006f3ee40b0679ab80/badge.svg?style=flat)](https://www.versioneye.com/user/projects/58445b006f3ee40b0679ab80)
 
 [![Latest Stable Version](https://poser.pugx.org/chadicus/slim-oauth2-routes/v/stable)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
 [![Latest Unstable Version](https://poser.pugx.org/chadicus/slim-oauth2-routes/v/unstable)](https://packagist.org/packages/chadicus/slim-oauth2-routes)
