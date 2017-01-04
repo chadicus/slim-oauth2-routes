@@ -126,7 +126,7 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
 
         $response = $route($request, new Response());
 
-		$this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
     }
 
     /**
@@ -146,6 +146,6 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
 
         $route = new Token($oauth2ServerMock);
         $response = $route(new ServerRequest(), new Response());
-		$this->assertSame('text/html', $response->getHeaderLine('Content-Type'));
+        $this->assertSame('text/html', $response->getHeaderLine('Content-Type'));
     }
 }
