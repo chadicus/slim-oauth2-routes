@@ -79,4 +79,73 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             $actual
         );
     }
+
+    /**
+     * Verify Content-Type header is added to response
+     *
+     * @test
+     * @covers ::__invoke
+     *
+     * @return void
+     */
+    public function invokeAddsContentType()
+    {
+        $storage = new Storage\Memory(
+            [
+                'client_credentials' => [
+                    'testClientId' => [
+                        'client_id' => 'testClientId',
+                        'client_secret' => 'testClientSecret',
+                    ],
+                ],
+            ]
+        );
+
+        $server = new OAuth2\Server(
+            $storage,
+            [
+                'access_lifetime' => 3600,
+            ],
+            [
+                new GrantType\ClientCredentials($storage),
+            ]
+        );
+
+        $uri = 'localhost:8888/token';
+
+        $headers = ['Content-Type' => ['application/json']];
+
+        $body = [
+            'client_id' => 'testClientId',
+            'client_secret' => 'testClientSecret',
+            'grant_type' => 'client_credentials',
+        ];
+        $request = new ServerRequest(['REQUEST_METHOD' => 'POST'], [], $uri, 'POST', 'php://input', $headers, [], [], $body);
+
+        $route = new Token($server);
+
+        $response = $route($request, new Response());
+
+        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+    }
+
+    /**
+     * Verify Content-Type header remains unchanged if OAuth2 response contains the header.
+     *
+     * @test
+     * @covers ::__invoke
+     *
+     * @return void
+     */
+    public function invokeRetainsContentType()
+    {
+        $oauth2ServerMock = $this->getMockBuilder('\\OAuth2\\Server')->disableOriginalConstructor()->getMock();
+        $oauth2ServerMock->method('handleTokenRequest')->willReturn(
+            new OAuth2\Response([], 200, ['Content-Type' => 'text/html'])
+        );
+
+        $route = new Token($oauth2ServerMock);
+        $response = $route(new ServerRequest(), new Response());
+        $this->assertSame('text/html', $response->getHeaderLine('Content-Type'));
+    }
 }
