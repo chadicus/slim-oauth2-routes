@@ -79,4 +79,53 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             $actual
         );
     }
+
+    /**
+     * Verify Content-Type header is added to response
+     *
+     * @test
+     * @covers ::__invoke
+     *
+     * @return void
+     */
+    public function invokeAddsContentType()
+    {
+        $storage = new Storage\Memory(
+            [
+                'client_credentials' => [
+                    'testClientId' => [
+                        'client_id' => 'testClientId',
+                        'client_secret' => 'testClientSecret',
+                    ],
+                ],
+            ]
+        );
+
+        $server = new OAuth2\Server(
+            $storage,
+            [
+                'access_lifetime' => 3600,
+            ],
+            [
+                new GrantType\ClientCredentials($storage),
+            ]
+        );
+
+        $uri = 'localhost:8888/token';
+
+        $headers = ['Content-Type' => ['application/json']];
+
+        $body = [
+            'client_id' => 'testClientId',
+            'client_secret' => 'testClientSecret',
+            'grant_type' => 'client_credentials',
+        ];
+        $request = new ServerRequest(['REQUEST_METHOD' => 'POST'], [], $uri, 'POST', 'php://input', $headers, [], [], $body);
+
+        $route = new Token($server);
+
+        $response = $route($request, new Response());
+
+		$this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+    }
 }
