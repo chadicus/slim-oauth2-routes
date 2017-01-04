@@ -128,4 +128,24 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
     }
+
+    /**
+     * Verify Content-Type header remains unchanged if OAuth2 response contains the header.
+     *
+     * @test
+     * @covers ::__invoke
+     *
+     * @return void
+     */
+    public function invokeRetainsContentType()
+    {
+        $oauth2ServerMock = $this->getMockBuilder('\\OAuth2\\Server')->disableOriginalConstructor()->getMock();
+        $oauth2ServerMock->method('handleTokenRequest')->willReturn(
+            new OAuth2\Response([], 200, ['Content-Type' => 'text/html'])
+        );
+
+        $route = new Token($oauth2ServerMock);
+        $response = $route(new ServerRequest(), new Response());
+		$this->assertSame('text/html', $response->getHeaderLine('Content-Type'));
+    }
 }
