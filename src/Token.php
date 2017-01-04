@@ -43,10 +43,8 @@ final class Token implements RouteCallbackInterface
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $arguments = [])
     {
-        /** @var OAuth2\Response $response */
-        $response = $this->server->handleTokenRequest(RequestBridge::toOAuth2($request));
-        $response->addHttpHeaders(['Content-Type' => 'application/json']);
-
-        return ResponseBridge::fromOAuth2($response);
+        return ResponseBridge::fromOAuth2(
+            $this->server->handleTokenRequest(RequestBridge::toOAuth2($request))
+        )->withHeader('Content-Type', 'application/json');
     }
 }
