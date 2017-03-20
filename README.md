@@ -22,7 +22,7 @@
 
 Chadicus\Slim\OAuth2\Routes requires PHP 5.6 (or later).
 
-##Composer
+## Composer
 To add the library as a local, per-project dependency use [Composer](http://getcomposer.org)! Simply add a dependency on
 `chadicus/slim-oauth2-routes` to your project's `composer.json` file such as:
 
@@ -30,13 +30,13 @@ To add the library as a local, per-project dependency use [Composer](http://getc
 composer require chadicus/slim-oauth2-routes
 ```
 
-##Contact
+## Contact
 Developers may be contacted at:
 
  * [Pull Requests](https://github.com/chadicus/slim-oauth2-routes/pulls)
  * [Issues](https://github.com/chadicus/slim-oauth2-routes/issues)
 
-##Project Build
+## Project Build
 With a checkout of the code get [Composer](http://getcomposer.org) in your PATH and run:
 
 ```sh
@@ -47,7 +47,7 @@ With a checkout of the code get [Composer](http://getcomposer.org) in your PATH 
 ## A Note on Using Views
 The `authorize` and `receive-code` route require `view` objects. The given view object must implement a render method such as the one found in [slim/twig-view](https://github.com/slimphp/Twig-View/blob/master/src/Twig.php#L103) and [slim/php-view](https://github.com/slimphp/PHP-View/blob/master/src/PhpRenderer.php#L64). It would be best if there was a common `ViewInterface` which both implementing but as of now such an interface does not exist.
 
-##Example Usage
+## Example Usage
 ```php
 use Chadicus\Slim\OAuth2\Routes;
 use OAuth2;
