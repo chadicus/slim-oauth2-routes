@@ -72,8 +72,8 @@ $app = new Slim\App(
 $container = $app->getContainer();
 
 $app->map(['GET', 'POST'], Routes\Authorize::ROUTE, new Routes\Authorize($server, $container['view']))->setName('authorize');
-$app->post(Routes\Token::ROUTE, new Routes\Token($server)->setName('token');
-$app->map(['GET', 'POST'], Routes\ReceiveCode::ROUTE, new Routes\ReceiveCode($server, $container['view']))->setName('receive-code');
+$app->post(Routes\Token::ROUTE, new Routes\Token($server))->setName('token');
+$app->map(['GET', 'POST'], Routes\ReceiveCode::ROUTE, new Routes\ReceiveCode($container['view']))->setName('receive-code');
 $app->post(Routes\Revoke::ROUTE, new Routes\Revoke($server))->setName('revoke');
 
 //Add custom routes
