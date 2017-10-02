@@ -22,9 +22,9 @@
     "require-dev": {
         "phpunit/phpunit": "^5.0",
         "chadicus/coding-standard": "^1.0",
-        "satooshi/php-coveralls": "^1.0",
         "slim/php-view": "^2.0",
-        "zendframework/zend-diactoros": "^1.3"
+        "zendframework/zend-diactoros": "^1.3",
+        "php-coveralls/php-coveralls": "^1.0"
     },
     "autoload": {
         "psr-4": {"Chadicus\\Slim\\OAuth2\\Routes\\" : "src"}
