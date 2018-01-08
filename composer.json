@@ -31,5 +31,8 @@
     },
     "autoload": {
         "psr-4": {"Chadicus\\Slim\\OAuth2\\Routes\\" : "src"}
+    },
+    "autoload-dev": {
+        "psr-4": {"ChadicusTest\\Slim\\OAuth2\\Routes\\" : "tests"}
     }
 }
