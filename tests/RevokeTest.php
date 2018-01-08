@@ -63,7 +63,7 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
 
         $uri = '/revoke';
         $headers = ['Content-Type' => ['application/json']];
-        $request = new ServerRequest(['REQUEST_METHOD' => 'POST'], [], $uri, 'POST', 'php://input', $headers, [], [], $body);
+        $request = $this->getRequest($uri, $headers, $body);
 
         $response = $route($request, new Response());
 
@@ -78,5 +78,20 @@ final class RevokeTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertFalse($storage->getAccessToken($token));
+    }
+
+    private function getRequest($uri, array $headers, array $body)
+    {
+        return new ServerRequest(
+            ['REQUEST_METHOD' => 'POST'],
+            [],
+            $uri,
+            'POST',
+            'php://input',
+            $headers,
+            [],
+            [],
+            $body
+        );
     }
 }

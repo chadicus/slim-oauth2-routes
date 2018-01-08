@@ -58,16 +58,16 @@ final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
 
         $code = md5(time());
         $request = new ServerRequest(
-			[],
-			[],
-			null,
+            [],
+            [],
+            null,
             'POST',
-			'php://input',
+            'php://input',
             ['Content-Type' => 'application/json'],
-			[],
+            [],
             [
                 'code' => $code,
-				'state' => 'xyz',
+                'state' => 'xyz',
             ]
         );
 

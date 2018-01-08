@@ -59,7 +59,7 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
             'client_secret' => 'testClientSecret',
             'grant_type' => 'client_credentials',
         ];
-        $request = new ServerRequest(['REQUEST_METHOD' => 'POST'], [], $uri, 'POST', 'php://input', $headers, [], [], $body);
+        $request = $this->getRequest($uri, $headers, $body);
 
         $route = new Token($server);
 
@@ -118,5 +118,20 @@ final class TokenTest extends \PHPUnit_Framework_TestCase
         $route = new Token($oauth2ServerMock);
         $response = $route(new ServerRequest(), new Response());
         $this->assertSame('text/html', $response->getHeaderLine('Content-Type'));
+    }
+
+    private function getRequest($uri, array $headers, array $body)
+    {
+        return new ServerRequest(
+            ['REQUEST_METHOD' => 'POST'],
+            [],
+            $uri,
+            'POST',
+            'php://input',
+            $headers,
+            [],
+            [],
+            $body
+        );
     }
 }

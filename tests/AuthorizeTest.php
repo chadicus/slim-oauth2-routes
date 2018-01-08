@@ -109,7 +109,7 @@ final class AuthorizeTest extends \PHPUnit_Framework_TestCase
 
         $route = new Authorize($server, $view);
 
-        $stream = fopen('php://memory','r+');
+        $stream = fopen('php://memory', 'r+');
         fwrite($stream, 'authorized=yes');
         rewind($stream);
         $body = new Stream($stream);
@@ -242,29 +242,10 @@ HTML;
 
         $route = new Authorize($server, $view);
 
-        $stream = fopen('php://memory','r+');
+        $stream = fopen('php://memory', 'r+');
         fwrite($stream, 'authorized=yes');
         rewind($stream);
-        $body = new Stream($stream);
-
-        $request = new ServerRequest(
-            [],
-            [],
-            'http://example.com/authorize',
-            'POST',
-            $body,
-            ['Content-Type' => 'application/x-www-form-urlencoded'],
-            [],
-            [
-                'client_id' => 'testClientId',
-                'redirect_uri' => 'http://example.com',
-                'response_type' => 'code',
-                'state' => 'test',
-                'user_id' => 'theUsername',
-            ],
-            ['authorized' => 'yes']
-        );
-
+        $request = $this->getRequest(new Stream($stream));
         $response = $route($request, new Response());
 
         $this->assertSame(302, $response->getStatusCode());
@@ -291,6 +272,27 @@ HTML;
                 ],
             ],
             $storage->authorizationCodes
+        );
+    }
+
+    private function getRequest(Stream $body)
+    {
+        return new ServerRequest(
+            [],
+            [],
+            'http://example.com/authorize',
+            'POST',
+            $body,
+            ['Content-Type' => 'application/x-www-form-urlencoded'],
+            [],
+            [
+                'client_id' => 'testClientId',
+                'redirect_uri' => 'http://example.com',
+                'response_type' => 'code',
+                'state' => 'test',
+                'user_id' => 'theUsername',
+            ],
+            ['authorized' => 'yes']
         );
     }
 }
