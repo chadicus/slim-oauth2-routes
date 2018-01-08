@@ -23,11 +23,11 @@
         "sort-packages": true
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.0",
         "chadicus/coding-standard": "^1.0",
+        "php-coveralls/php-coveralls": "^1.0",
+        "phpunit/phpunit": "^5.7",
         "slim/php-view": "^2.0",
-        "zendframework/zend-diactoros": ">=1.3.2",
-        "php-coveralls/php-coveralls": "^1.0"
+        "zendframework/zend-diactoros": ">=1.3.2"
     },
     "autoload": {
         "psr-4": {"Chadicus\\Slim\\OAuth2\\Routes\\" : "src"}
