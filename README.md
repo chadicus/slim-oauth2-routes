@@ -45,6 +45,9 @@ With a checkout of the code get [Composer](http://getcomposer.org) in your PATH 
 ## A Note on Using Views
 The `authorize` and `receive-code` route require `view` objects. The given view object must implement a render method such as the one found in [slim/twig-view](https://github.com/slimphp/Twig-View/blob/master/src/Twig.php#L103) and [slim/php-view](https://github.com/slimphp/PHP-View/blob/master/src/PhpRenderer.php#L64). It would be best if there was a common `ViewInterface` which both implementing but as of now such an interface does not exist.
 
+## Community
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/slim-oauth2/Lobby#)
+
 ## Example Usage
 ```php
 use Chadicus\Slim\OAuth2\Routes;
