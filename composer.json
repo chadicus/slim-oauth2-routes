@@ -19,6 +19,9 @@
         "chadicus/slim-oauth2-middleware": "Adds OAuth2 middleware for API requests.",
         "slim/php-view": "Simple template rendering"
     },
+    "config" : {
+        "sort-packages": true
+    },
     "require-dev": {
         "phpunit/phpunit": "^5.0",
         "chadicus/coding-standard": "^1.0",
