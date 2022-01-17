@@ -9,6 +9,7 @@ use Slim\Views;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\Stream;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Authorize class.
@@ -17,7 +18,7 @@ use Zend\Diactoros\Stream;
  * @covers ::<private>
  * @covers ::__construct
  */
-final class AuthorizeTest extends \PHPUnit_Framework_TestCase
+final class AuthorizeTest extends TestCase
 {
     /**
      * Verify behavior of __invoke() with no client_id parameter
@@ -205,13 +206,14 @@ HTML;
      *
      * @test
      * @covers ::__construct
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMethod $view must implement a render() method
      *
      * @return void
      */
     public function constructWithInvalidView()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('$view must implement a render() method');
+
         $server = new OAuth2\Server(new Storage\Memory([]), [], []);
         new Authorize($server, new \StdClass());
     }

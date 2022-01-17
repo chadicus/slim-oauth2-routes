@@ -9,6 +9,7 @@ use OAuth2\Storage;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\Stream;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Token class.
@@ -17,7 +18,7 @@ use Zend\Diactoros\Stream;
  * @covers ::<private>
  * @covers ::__construct
  */
-final class TokenTest extends \PHPUnit_Framework_TestCase
+final class TokenTest extends TestCase
 {
     /**
      * Verify basic behavior of __invoke()
