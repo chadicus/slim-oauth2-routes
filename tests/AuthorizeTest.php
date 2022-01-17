@@ -6,9 +6,9 @@ use Chadicus\Slim\OAuth2\Routes\Authorize;
 use OAuth2;
 use OAuth2\Storage;
 use Slim\Views;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Stream;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\Stream;
 use PHPUnit\Framework\TestCase;
 
 /**
