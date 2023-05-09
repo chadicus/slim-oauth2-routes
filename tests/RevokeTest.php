@@ -8,6 +8,7 @@ use Laminas\Diactoros\ServerRequest;
 use OAuth2;
 use OAuth2\Storage;
 use OAuth2\GrantType;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Revoke class.
@@ -16,7 +17,7 @@ use OAuth2\GrantType;
  * @covers ::<private>
  * @covers ::__construct
  */
-final class RevokeTest extends \PHPUnit_Framework_TestCase
+final class RevokeTest extends TestCase
 {
     /**
      * Verify basic behavior of __invoke()
