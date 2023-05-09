@@ -2,13 +2,6 @@
     "name": "chadicus/slim-oauth2-routes",
     "description": "OAuth2 routes for use within a Slim Framework API",
     "keywords": ["slim", "oauth2", "routing"],
-    "authors": [
-        {
-            "name": "Chad Gray",
-            "email": "chadwickgray@gmail.com",
-            "role": "Developer"
-        }
-    ],
     "license": "MIT",
     "require": {
         "php": "^5.6 || ^7.0 || ^8.0",
