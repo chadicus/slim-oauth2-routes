@@ -3,12 +3,11 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\Token;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
 use OAuth2;
 use OAuth2\GrantType;
 use OAuth2\Storage;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Stream;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\Token class.

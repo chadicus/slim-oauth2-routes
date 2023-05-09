@@ -3,7 +3,7 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\UserIdProvider;
-use Zend\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequest;
 
 /**
  * @coversDefaultClass \Chadicus\Slim\OAuth2\Routes\UserIdProvider
