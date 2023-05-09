@@ -33,5 +33,9 @@
     },
     "autoload-dev": {
         "psr-4": {"ChadicusTest\\Slim\\OAuth2\\Routes\\" : "tests"}
+    },
+    "scripts": {
+        "lint": "vendor/bin/phpcs",
+        "test": "vendor/bin/phpunit"
     }
 }
