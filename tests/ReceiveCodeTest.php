@@ -3,13 +3,13 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\ReceiveCode;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
 use OAuth2;
 use OAuth2\GrantType;
 use OAuth2\Storage;
+use PHPUnit\Framework\TestCase;
 use Slim\Views;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Stream;
 
 /**
  * Unit tests for the \Chadicus\Slim\OAuth2\Routes\ReceiveCode class.
@@ -18,7 +18,7 @@ use Zend\Diactoros\Stream;
  * @covers ::<private>
  * @covers ::__construct
  */
-final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
+final class ReceiveCodeTest extends TestCase
 {
     /**
      * Verify basic behavior of __invoke()
@@ -83,13 +83,13 @@ final class ReceiveCodeTest extends \PHPUnit_Framework_TestCase
      *
      * @test
      * @covers ::__construct
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMethod $view must implement a render() method
      *
      * @return void
      */
     public function constructWithInvalidView()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('$view must implement a render() method');
         $server = new OAuth2\Server(new Storage\Memory([]), [], []);
         new ReceiveCode($server, new \StdClass());
     }

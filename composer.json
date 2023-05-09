@@ -2,18 +2,11 @@
     "name": "chadicus/slim-oauth2-routes",
     "description": "OAuth2 routes for use within a Slim Framework API",
     "keywords": ["slim", "oauth2", "routing"],
-    "authors": [
-        {
-            "name": "Chad Gray",
-            "email": "chadwickgray@gmail.com",
-            "role": "Developer"
-        }
-    ],
     "license": "MIT",
     "require": {
-        "php": "^5.6 || ^7.0",
+        "php": "^5.6 || ^7.0 || ^8.0",
         "bshaffer/oauth2-server-php": "^1.9",
-        "chadicus/slim-oauth2-http": "^3.1"
+        "chadicus/slim-oauth2-http": "^3.2"
     },
     "suggest": {
         "chadicus/slim-oauth2-middleware": "Adds OAuth2 middleware for API requests.",
@@ -23,16 +16,19 @@
         "sort-packages": true
     },
     "require-dev": {
-        "chadicus/coding-standard": "^1.3",
-        "php-coveralls/php-coveralls": "^1.0",
-        "phpunit/phpunit": "^5.7",
+        "laminas/laminas-diactoros": "^1.8 || ^2.0",
+        "phpunit/phpunit": "^5.7 || ^6.5 || ^9.6 || ^10.1",
         "slim/php-view": "^2.0.5",
-        "zendframework/zend-diactoros": ">=1.3.2"
+        "squizlabs/php_codesniffer": "^3.7"
     },
     "autoload": {
         "psr-4": {"Chadicus\\Slim\\OAuth2\\Routes\\" : "src"}
     },
     "autoload-dev": {
         "psr-4": {"ChadicusTest\\Slim\\OAuth2\\Routes\\" : "tests"}
+    },
+    "scripts": {
+        "lint": "vendor/bin/phpcs",
+        "test": "vendor/bin/phpunit"
     }
 }

@@ -3,12 +3,13 @@
 namespace ChadicusTest\Slim\OAuth2\Routes;
 
 use Chadicus\Slim\OAuth2\Routes\UserIdProvider;
-use Zend\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequest;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Chadicus\Slim\OAuth2\Routes\UserIdProvider
  */
-final class UserIdProviderTest extends \PHPUnit_Framework_TestCase
+final class UserIdProviderTest extends TestCase
 {
     /**
      * Verify basic behavior of getUserId()
